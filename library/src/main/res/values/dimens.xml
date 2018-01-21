@@ -1,0 +1,4 @@
+<resources>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="card_margin_vertical">8dp</dimen>
+</resources>

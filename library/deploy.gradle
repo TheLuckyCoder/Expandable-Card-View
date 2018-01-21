@@ -1,0 +1,36 @@
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+apply from: 'keystore.gradle'
+
+ext {
+    groupId = 'net.theluckycoder.expandablecardview'
+    artifactId = "expandablecardview"
+}
+
+version = libVersion
+group = groupId
+bintray {
+    user = 'theluckycoder'
+    key = bintray_key
+    configurations = ['archives']
+    publish = true
+    override = false
+    pkg {
+        repo = "expandablecardview"
+        name = "expandable-card-view"
+        version {
+            name = libVersion
+        }
+    }
+}
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            packaging 'aar'
+            groupId groupId
+            artifactId artifactId
+            version libVersion
+            name artifactId
+        }
+    }
+}

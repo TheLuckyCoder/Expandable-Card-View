@@ -17,7 +17,7 @@ bintray {
     override = false
     pkg {
         repo = "expandablecardview"
-        name = "expandable-card-view"
+        name = "expandable-cardview"
         version {
             name = libVersion
         }

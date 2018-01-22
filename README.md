@@ -3,8 +3,6 @@
 [![Download](https://api.bintray.com/packages/theluckycoder/expandablecardview/expandable-card-view/images/download.svg) ](https://bintray.com/theluckycoder/expandablecardview/expandable-card-view/_latestVersion)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/vipulasri/Timeline-View/blob/master/LICENSE)
 
-![showcase](https://github.com/TheLuckyCoder/Expandable-Card-View/tree/master/art/screenshot.png)
-
 ## Sample Project
 
 For an example: checkout [Sample App Code](https://github.com/TheLuckyCoder/Expandable-Card-View/tree/master/sample/src/main) in repository.

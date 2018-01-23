@@ -1,6 +1,6 @@
 # Expandable CardView
 [![API](https://img.shields.io/badge/API-15%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=15)
-[![Download](https://api.bintray.com/packages/theluckycoder/expandablecardview/expandable-card-view/images/download.svg) ](https://bintray.com/theluckycoder/expandablecardview/expandable-card-view/_latestVersion)
+[![Download](https://api.bintray.com/packages/theluckycoder/expandablecardview/expandable-cardview/images/download.svg) ](https://bintray.com/theluckycoder/expandablecardview/expandable-cardview/_latestVersion)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/vipulasri/Timeline-View/blob/master/LICENSE)
 
 ## Sample Project

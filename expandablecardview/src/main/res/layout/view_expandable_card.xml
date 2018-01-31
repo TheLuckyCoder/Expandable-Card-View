@@ -9,7 +9,7 @@
     android:paddingLeft="@dimen/activity_vertical_margin"
     android:paddingRight="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/card_margin_vertical"
-    android:foreground="?attr/selectableItemBackground">
+    android:foreground="?attr/android:selectableItemBackground">
 
     <TextView
         android:id="@+id/tv_card_title"

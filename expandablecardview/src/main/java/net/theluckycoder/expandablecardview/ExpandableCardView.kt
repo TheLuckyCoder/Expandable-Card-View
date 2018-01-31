@@ -3,6 +3,7 @@ package net.theluckycoder.expandablecardview
 import android.content.Context
 import android.support.annotation.IdRes
 import android.support.annotation.StringRes
+import android.support.transition.ChangeBounds
 import android.support.transition.TransitionManager
 import android.support.v4.view.ViewCompat
 import android.support.v7.widget.CardView
@@ -14,7 +15,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 
-class ExpandableCardView : CardView {
+open class ExpandableCardView : CardView {
 
     private val tvTitle by bind<TextView>(R.id.tv_card_title)
     private val tvDescription by bind<TextView>(R.id.tv_card_desc)
@@ -38,8 +39,8 @@ class ExpandableCardView : CardView {
 
         attrs?.let {
             val typedArray = context.obtainStyledAttributes(attrs, R.styleable.ExpandableCardView)
-            setCardTitle(typedArray.getString(R.styleable.ExpandableCardView_title) ?: "")
-            setCardDescription(typedArray.getString(R.styleable.ExpandableCardView_description) ?: "")
+            cardTitle = typedArray.getString(R.styleable.ExpandableCardView_title) ?: ""
+            cardDescription = typedArray.getString(R.styleable.ExpandableCardView_description) ?: ""
 
             typedArray.recycle()
         }
@@ -50,39 +51,43 @@ class ExpandableCardView : CardView {
     }
 
     /**
-     * Sets the title of the card
-     * @param title The text to be set as title
+     * @property cardTitle The title of the card
      */
-    fun setCardTitle(title: CharSequence) {
-        tvTitle.text = title
-    }
+    var cardTitle: CharSequence
+        get() = tvTitle.text
+        set(title) {
+            tvTitle.text = title
+        }
 
     /**
      * Sets the title of the card
      * @param resId String resource to display as title
+     * @see cardTitle
      */
     fun setCardTitle(@StringRes resId: Int) {
-        setCardTitle(context.getString(resId))
+        cardTitle = context.getString(resId)
     }
 
     /**
-     * Sets the description of the card
-     * @param description The text to be set as description
+     * @property cardDescription The description of the card
      */
-    fun setCardDescription(description: CharSequence) {
-        tvDescription.text = description
-    }
+    var cardDescription: CharSequence
+        get() = tvDescription.text
+        set(description) {
+            tvDescription.text = description
+        }
 
     /**
      * Sets the title of the card
      * @param resId String resource to display as description
+     * @see cardDescription
      */
     fun setCardDescription(@StringRes resId: Int) {
-        setCardDescription(context.getString(resId))
+        cardDescription = context.getString(resId)
     }
 
     /**
-     * Sets the ClickListener of the action button
+     * Set the action to be displayed
      * @param text Text to display for the action
      * @param listener Callback to be invoked when the action is clicked
      */
@@ -92,7 +97,7 @@ class ExpandableCardView : CardView {
     }
 
     /**
-     * Sets the ClickListener of the action button
+     * Set the action to be displayed
      * @param resId String resource to display for the action
      * @param listener Callback to be invoked when the action is clicked
      */
@@ -102,9 +107,10 @@ class ExpandableCardView : CardView {
 
     /**
      * Automatically expand or collapse the card when it`s clicked
-     * @param sceneRoot Required for animation. Leave null to disable animation
+     * @param sceneRoot Required for animation
      */
-    fun setExpandCollapseListener(sceneRoot: ViewGroup?) {
+    fun setExpandCollapseListener(sceneRoot: ViewGroup) {
+        setOnClickListener(null)
         setOnClickListener {
             expandCollapseCard(sceneRoot)
         }
@@ -114,9 +120,10 @@ class ExpandableCardView : CardView {
      * Expand or collapse the card
      * @param sceneRoot Required for animation. Leave null to disable animation
      */
-    fun expandCollapseCard(sceneRoot: ViewGroup?) {
+    open fun expandCollapseCard(sceneRoot: ViewGroup?) {
         sceneRoot?.let {
-            TransitionManager.beginDelayedTransition(it)
+            val transition = ChangeBounds()
+            TransitionManager.beginDelayedTransition(it, transition)
         }
 
         val rotation = if (tvDescription.visibility == View.VISIBLE) {

@@ -17,8 +17,8 @@ class MainActivity : AppCompatActivity() {
 
         val card2 = findViewById<ExpandableCardView>(R.id.card2)
         card2.setExpandCollapseListener(findViewById(android.R.id.content))
-        card2.setCardTitle("Card with Action")
-        card2.setCardDescription("An expandable card with an action button")
+        card2.cardTitle = "Card with Action"
+        card2.cardDescription = "An expandable card with an action button"
         card2.setAction("Action", View.OnClickListener {
             Toast.makeText(this@MainActivity, "Button Clicked", Toast.LENGTH_SHORT).show()
         })

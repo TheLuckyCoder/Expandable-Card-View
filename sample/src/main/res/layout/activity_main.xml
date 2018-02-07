@@ -15,7 +15,8 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         app:title="Expandable Card"
-        app:description="A description" />
+        app:description="A description"
+        app:expanded="true" />
 
     <net.theluckycoder.expandablecardview.ExpandableCardView
         android:id="@+id/card2"
@@ -24,8 +25,6 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        app:elevation="2dp"
-        app:cardCornerRadius="2dp" />
+        android:layout_marginRight="16dp" />
 
 </LinearLayout>

@@ -4,7 +4,9 @@ import android.content.Context
 import android.support.annotation.IdRes
 import android.support.annotation.StringRes
 import android.support.transition.ChangeBounds
+import android.support.transition.Fade
 import android.support.transition.TransitionManager
+import android.support.transition.TransitionSet
 import android.support.v4.view.ViewCompat
 import android.support.v7.widget.CardView
 import android.util.AttributeSet
@@ -19,7 +21,7 @@ open class ExpandableCardView : CardView {
 
     private val tvTitle by bind<TextView>(R.id.tv_card_title)
     private val tvDescription by bind<TextView>(R.id.tv_card_desc)
-    private val imgExpand by bind<ImageView>(R.id.img_card_expand)
+    private val imgExpand by bind<ImageView>(R.id.iv_card_expand)
     private val btnAction by bind<Button>(R.id.btn_card_action)
 
     constructor(context: Context) : super(context) {
@@ -41,12 +43,13 @@ open class ExpandableCardView : CardView {
             val typedArray = context.obtainStyledAttributes(attrs, R.styleable.ExpandableCardView)
             cardTitle = typedArray.getString(R.styleable.ExpandableCardView_title) ?: ""
             cardDescription = typedArray.getString(R.styleable.ExpandableCardView_description) ?: ""
+            setExpanded(typedArray.getBoolean(R.styleable.ExpandableCardView_expanded, false))
 
             typedArray.recycle()
         }
 
         setOnClickListener {
-            expandCollapseCard(null)
+            setExpanded(!isExpanded)
         }
     }
 
@@ -106,40 +109,51 @@ open class ExpandableCardView : CardView {
     }
 
     /**
-     * Automatically expand or collapse the card when it`s clicked
+     * Automatically expand or collapse the card when clicked
      * @param sceneRoot Required for animation
      */
     fun setExpandCollapseListener(sceneRoot: ViewGroup) {
-        setOnClickListener(null)
         setOnClickListener {
-            expandCollapseCard(sceneRoot)
+            setExpanded(!isExpanded, sceneRoot)
         }
     }
 
     /**
-     * Expand or collapse the card
-     * @param sceneRoot Required for animation. Leave null to disable animation
+     * Check if the card is expanded or not
      */
-    open fun expandCollapseCard(sceneRoot: ViewGroup?) {
+    open val isExpanded get() = tvDescription.visibility == View.VISIBLE
+
+    /**
+     * Expand or collapse the card
+     * @param expand
+     * @param sceneRoot Required for change bounds transition. Leave null to disable animation
+     */
+    open fun setExpanded(expand: Boolean, sceneRoot: ViewGroup? = null) {
         sceneRoot?.let {
-            val transition = ChangeBounds()
-            TransitionManager.beginDelayedTransition(it, transition)
+            val transitionSet = TransitionSet().apply {
+                addTransition(Fade())
+                addTransition(ChangeBounds())
+                duration = 400
+            }
+            TransitionManager.beginDelayedTransition(it, transitionSet)
         }
 
-        val rotation = if (tvDescription.visibility == View.VISIBLE) {
+        if (isExpanded && !expand) {
             tvDescription.visibility = View.GONE
             btnAction.visibility = View.GONE
-            0f
-        } else {
+            rotateImage(0f)
+        } else if (!isExpanded && expand) {
             tvDescription.visibility = View.VISIBLE
             if (btnAction.hasOnClickListeners()) {
                 btnAction.visibility = View.VISIBLE
             }
-            180f
+            rotateImage(180f)
         }
+    }
 
+    private fun rotateImage(value: Float) {
         ViewCompat.animate(imgExpand)
-            .rotation(rotation)
+            .rotation(value)
             .withLayer()
             .setDuration(500)
             .setInterpolator(OvershootInterpolator())

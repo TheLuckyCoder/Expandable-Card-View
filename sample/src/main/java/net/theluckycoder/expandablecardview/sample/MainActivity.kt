@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
         card2.cardTitle = "Card with Action"
         card2.cardDescription = "An expandable card with an action button"
         card2.setAction("Action", View.OnClickListener {
-            Toast.makeText(this@MainActivity, "Button Clicked", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Button Clicked", Toast.LENGTH_SHORT).show()
         })
     }
 }

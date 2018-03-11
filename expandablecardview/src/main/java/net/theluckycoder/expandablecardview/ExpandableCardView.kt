@@ -3,8 +3,6 @@ package net.theluckycoder.expandablecardview
 import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
 import android.content.Context
-import android.os.Bundle
-import android.os.Parcelable
 import android.support.annotation.IdRes
 import android.support.annotation.StringRes
 import android.support.v4.view.ViewCompat
@@ -15,6 +13,9 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 
+/**
+ * A CardView that can be expanded
+ **/
 open class ExpandableCardView : CardView {
 
     private val tvTitle by bind<TextView>(R.id.tv_card_title)
@@ -35,27 +36,6 @@ open class ExpandableCardView : CardView {
         init(attrs)
     }
 
-    override fun onSaveInstanceState(): Parcelable? {
-        return Bundle().apply {
-            putBoolean("expanded", isExpanded)
-            putParcelable("superState", super.onSaveInstanceState())
-        }
-    }
-
-    override fun onRestoreInstanceState(state: Parcelable?) {
-        var superState: Parcelable? = null
-        if (state is Bundle) {
-            if (state.getBoolean("expanded")) {
-                expand(false)
-            } else {
-                collapse(false)
-            }
-            superState = state.getParcelable("superState")
-        }
-
-        super.onRestoreInstanceState(superState)
-    }
-
     private fun init(attrs: AttributeSet?) {
         inflate(context, R.layout.view_expandable_card, this)
 
@@ -65,6 +45,7 @@ open class ExpandableCardView : CardView {
             cardTitle = typedArray.getString(R.styleable.ExpandableCardView_title) ?: ""
             cardDescription = typedArray.getString(R.styleable.ExpandableCardView_description) ?: ""
             expanded = typedArray.getBoolean(R.styleable.ExpandableCardView_expanded, false)
+            expandDuration = typedArray.getInt(R.styleable.ExpandableCardView_expand_duration, 400).toLong()
 
             typedArray.recycle()
         }
@@ -129,15 +110,15 @@ open class ExpandableCardView : CardView {
     private fun animate(from: Int, to: Int) {
         val valuesHolder: PropertyValuesHolder = PropertyValuesHolder.ofInt("prop", from, to)
 
-        ValueAnimator.ofPropertyValuesHolder(valuesHolder).apply {
-            duration = expandDuration
-            addUpdateListener {
-                layoutContent.layoutParams.height = getAnimatedValue("prop") as Int
-                layoutContent.requestLayout()
-                invalidate()
-            }
-            start()
+        val animator = ValueAnimator.ofPropertyValuesHolder(valuesHolder)
+        animator.duration = expandDuration
+        animator.addUpdateListener {
+            val value = animator.getAnimatedValue("prop") as Int? ?: 0
+            layoutContent.layoutParams.height = value
+            layoutContent.requestLayout()
+            invalidate()
         }
+        animator.start()
     }
 
     /**

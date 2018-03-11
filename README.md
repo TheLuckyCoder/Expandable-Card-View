@@ -1,5 +1,5 @@
 # Expandable CardView
-[![API](https://img.shields.io/badge/API-15%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=15)
+[![API](https://img.shields.io/badge/API-14%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=14)
 [![Download](https://api.bintray.com/packages/theluckycoder/expandablecardview/expandable-cardview/images/download.svg) ](https://bintray.com/theluckycoder/expandablecardview/expandable-cardview/_latestVersion)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/vipulasri/Timeline-View/blob/master/LICENSE)
 
@@ -15,7 +15,7 @@ For an example: checkout [Sample App Code](https://github.com/TheLuckyCoder/Expa
 
 ```gradle
 dependencies {
-    compile 'net.theluckycoder.expandablecardview:expandablecardview:1.0.0'
+    compile 'net.theluckycoder.expandablecardview:expandablecardview:1.1.0'
 }
 ```
 
@@ -25,7 +25,7 @@ dependencies {
 <dependency>
   <groupId>net.theluckycoder.expandablecardview</groupId>
   <artifactId>expandablecardview</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <type>pom</type>
 </dependency>
 ```

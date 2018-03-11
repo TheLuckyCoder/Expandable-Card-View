@@ -1,18 +1,16 @@
 package net.theluckycoder.expandablecardview
 
+import android.animation.PropertyValuesHolder
+import android.animation.ValueAnimator
 import android.content.Context
+import android.os.Bundle
+import android.os.Parcelable
 import android.support.annotation.IdRes
 import android.support.annotation.StringRes
-import android.support.transition.ChangeBounds
-import android.support.transition.Fade
-import android.support.transition.TransitionManager
-import android.support.transition.TransitionSet
 import android.support.v4.view.ViewCompat
 import android.support.v7.widget.CardView
 import android.util.AttributeSet
 import android.view.View
-import android.view.ViewGroup
-import android.view.animation.OvershootInterpolator
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -21,8 +19,9 @@ open class ExpandableCardView : CardView {
 
     private val tvTitle by bind<TextView>(R.id.tv_card_title)
     private val tvDescription by bind<TextView>(R.id.tv_card_desc)
-    private val imgExpand by bind<ImageView>(R.id.iv_card_expand)
+    private val ivArrow by bind<ImageView>(R.id.iv_card_expand)
     private val btnAction by bind<Button>(R.id.btn_card_action)
+    private val layoutContent by bind<View>(R.id.layout_content)
 
     constructor(context: Context) : super(context) {
         init(null)
@@ -36,27 +35,143 @@ open class ExpandableCardView : CardView {
         init(attrs)
     }
 
+    override fun onSaveInstanceState(): Parcelable? {
+        return Bundle().apply {
+            putBoolean("expanded", isExpanded)
+            putParcelable("superState", super.onSaveInstanceState())
+        }
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        var superState: Parcelable? = null
+        if (state is Bundle) {
+            if (state.getBoolean("expanded")) {
+                expand(false)
+            } else {
+                collapse(false)
+            }
+            superState = state.getParcelable("superState")
+        }
+
+        super.onRestoreInstanceState(superState)
+    }
+
     private fun init(attrs: AttributeSet?) {
         inflate(context, R.layout.view_expandable_card, this)
 
+        var expanded = false
         attrs?.let {
             val typedArray = context.obtainStyledAttributes(attrs, R.styleable.ExpandableCardView)
             cardTitle = typedArray.getString(R.styleable.ExpandableCardView_title) ?: ""
             cardDescription = typedArray.getString(R.styleable.ExpandableCardView_description) ?: ""
-            setExpanded(typedArray.getBoolean(R.styleable.ExpandableCardView_expanded, false))
+            expanded = typedArray.getBoolean(R.styleable.ExpandableCardView_expanded, false)
 
             typedArray.recycle()
         }
 
-        setOnClickListener {
-            setExpanded(!isExpanded)
+        post {
+            if (expanded) {
+                expand(false)
+            } else {
+                setHeightToZero(false)
+            }
         }
+
+        setOnClickListener {
+            if (isExpanded) {
+                collapse(true)
+            } else {
+                expand(true)
+            }
+        }
+    }
+
+    private fun <T : View> View.bind(@IdRes res: Int): Lazy<T> =
+        lazy(LazyThreadSafetyMode.NONE) { findViewById<T>(res) }
+
+    private fun rotateArrow(rotation: Float, animate: Boolean) {
+        ViewCompat.animate(ivArrow)
+            .rotation(rotation)
+            .withLayer()
+            .setDuration(if (animate) expandDuration else 0)
+            .start()
+    }
+
+    private fun setHeightToZero(animate: Boolean) {
+        if (animate) {
+            animate(layoutContent.height, 0)
+        } else {
+            setContentHeight(0)
+        }
+    }
+
+    private fun setHeightToContentHeight(animate: Boolean) {
+        measureContentView()
+        val targetHeight = layoutContent.measuredHeight
+        if (animate) {
+            animate(0, targetHeight)
+        } else {
+            setContentHeight(targetHeight)
+        }
+    }
+
+    private fun setContentHeight(height: Int) {
+        layoutContent.layoutParams.height = height
+        layoutContent.requestLayout()
+    }
+
+    private fun measureContentView() {
+        val widthMS = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.AT_MOST)
+        val heightMS = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        layoutContent.measure(widthMS, heightMS)
+    }
+
+    private fun animate(from: Int, to: Int) {
+        val valuesHolder: PropertyValuesHolder = PropertyValuesHolder.ofInt("prop", from, to)
+
+        ValueAnimator.ofPropertyValuesHolder(valuesHolder).apply {
+            duration = expandDuration
+            addUpdateListener {
+                layoutContent.layoutParams.height = getAnimatedValue("prop") as Int
+                layoutContent.requestLayout()
+                invalidate()
+            }
+            start()
+        }
+    }
+
+    /**
+     * Check if the card is expanded
+     */
+    var isExpanded = false
+        private set
+
+    /**
+     * Expand the Card
+     */
+    open fun expand(animate: Boolean) {
+        if (isExpanded) return
+
+        setHeightToContentHeight(animate)
+        rotateArrow(180f, animate)
+        isExpanded = true
+    }
+
+    /**
+     * Collapse the Card
+     */
+    open fun collapse(animate: Boolean) {
+        if (!isExpanded) return
+
+        setHeightToZero(animate)
+        rotateArrow(0f, animate)
+        isExpanded = false
     }
 
     /**
      * @property cardTitle The title of the card
      */
-    var cardTitle: CharSequence
+    open var cardTitle: CharSequence
         get() = tvTitle.text
         set(title) {
             tvTitle.text = title
@@ -67,14 +182,14 @@ open class ExpandableCardView : CardView {
      * @param resId String resource to display as title
      * @see cardTitle
      */
-    fun setCardTitle(@StringRes resId: Int) {
+    open fun setCardTitle(@StringRes resId: Int) {
         cardTitle = context.getString(resId)
     }
 
     /**
      * @property cardDescription The description of the card
      */
-    var cardDescription: CharSequence
+    open var cardDescription: CharSequence
         get() = tvDescription.text
         set(description) {
             tvDescription.text = description
@@ -85,17 +200,31 @@ open class ExpandableCardView : CardView {
      * @param resId String resource to display as description
      * @see cardDescription
      */
-    fun setCardDescription(@StringRes resId: Int) {
+    open fun setCardDescription(@StringRes resId: Int) {
         cardDescription = context.getString(resId)
     }
+
+    /**
+     * @property expandDuration The duration of the expand animation
+     * @throws IllegalArgumentException if the duration is <= 0
+     */
+    open var expandDuration: Long = 400
+        set(duration) {
+            if (duration > 0) {
+                field = duration
+            } else {
+                throw IllegalArgumentException("Card Expand Duration can not be smaller than or equal to 0")
+            }
+        }
 
     /**
      * Set the action to be displayed
      * @param text Text to display for the action
      * @param listener Callback to be invoked when the action is clicked
      */
-    fun setAction(text: CharSequence, listener: View.OnClickListener) {
+    open fun setAction(text: CharSequence, listener: View.OnClickListener) {
         btnAction.text = text
+        btnAction.visibility = View.VISIBLE
         btnAction.setOnClickListener(listener)
     }
 
@@ -104,62 +233,7 @@ open class ExpandableCardView : CardView {
      * @param resId String resource to display for the action
      * @param listener Callback to be invoked when the action is clicked
      */
-    fun setAction(@StringRes resId: Int, listener: View.OnClickListener) {
+    open fun setAction(@StringRes resId: Int, listener: View.OnClickListener) {
         setAction(context.getString(resId), listener)
     }
-
-    /**
-     * Automatically expand or collapse the card when clicked
-     * @param sceneRoot Required for animation
-     */
-    fun setExpandCollapseListener(sceneRoot: ViewGroup) {
-        setOnClickListener {
-            setExpanded(!isExpanded, sceneRoot)
-        }
-    }
-
-    /**
-     * Check if the card is expanded or not
-     */
-    open val isExpanded get() = tvDescription.visibility == View.VISIBLE
-
-    /**
-     * Expand or collapse the card
-     * @param expand
-     * @param sceneRoot Required for change bounds transition. Leave null to disable animation
-     */
-    open fun setExpanded(expand: Boolean, sceneRoot: ViewGroup? = null) {
-        sceneRoot?.let {
-            val transitionSet = TransitionSet().apply {
-                addTransition(Fade())
-                addTransition(ChangeBounds())
-                duration = 400
-            }
-            TransitionManager.beginDelayedTransition(it, transitionSet)
-        }
-
-        if (isExpanded && !expand) {
-            tvDescription.visibility = View.GONE
-            btnAction.visibility = View.GONE
-            rotateImage(0f)
-        } else if (!isExpanded && expand) {
-            tvDescription.visibility = View.VISIBLE
-            if (btnAction.hasOnClickListeners()) {
-                btnAction.visibility = View.VISIBLE
-            }
-            rotateImage(180f)
-        }
-    }
-
-    private fun rotateImage(value: Float) {
-        ViewCompat.animate(imgExpand)
-            .rotation(value)
-            .withLayer()
-            .setDuration(500)
-            .setInterpolator(OvershootInterpolator())
-            .start()
-    }
-
-    private fun <T : View> View.bind(@IdRes res: Int): Lazy<T> =
-        lazy(LazyThreadSafetyMode.NONE) { findViewById<T>(res) }
 }

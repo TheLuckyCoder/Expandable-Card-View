@@ -15,7 +15,7 @@ import android.widget.TextView
 
 /**
  * A CardView that can be expanded
- **/
+ */
 open class ExpandableCardView : CardView {
 
     private val tvTitle by bind<TextView>(R.id.tv_card_title)

@@ -42,14 +42,19 @@ dependencies {
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
     app:title="Card Title"
-    app:description="Card Description" />
+    app:description="Card Description"
+    app:expanded="true"
+    app:expand_duration="300" />
 ```
 
-* In Java Code:
-```java
-ExpandableCardView card = (ExpandableCardView) findViewById(R.id.card);
-// You will this need to enable the transform animation:
-card.setExpandCollapseListener(findViewById(android.R.id.content));
+* In Kotlin Code:
+```kotlin
+val card = findViewById<ExpandableCardView>(R.id.card)
+card.cardTitle = "Card with Action"
+card.cardDescription = "An expandable card with an action button"
+card.setAction("Action", View.OnClickListener {
+    Toast.makeText(this, "Button Clicked", Toast.LENGTH_SHORT).show()
+})
 ```
 
 ## Documentation

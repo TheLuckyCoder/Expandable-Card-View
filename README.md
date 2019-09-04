@@ -15,7 +15,7 @@ For an example: checkout [Sample App Code](https://github.com/TheLuckyCoder/Expa
 
 ```gradle
 dependencies {
-    compile 'net.theluckycoder.expandablecardview:expandablecardview:1.1.0'
+    implementation 'net.theluckycoder.expandablecardview:expandablecardview:1.2.0'
 }
 ```
 
@@ -25,7 +25,7 @@ dependencies {
 <dependency>
   <groupId>net.theluckycoder.expandablecardview</groupId>
   <artifactId>expandablecardview</artifactId>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
   <type>pom</type>
 </dependency>
 ```
@@ -63,7 +63,7 @@ You can find all the usable methods documented [here](https://github.com/TheLuck
 ## License
 
 ```
-Copyright 2018 The Lucky Coder
+Copyright 2019 The Lucky Coder
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

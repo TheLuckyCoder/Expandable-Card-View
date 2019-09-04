@@ -29,7 +29,6 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:tint="?android:textColorPrimary"
-        android:layout_gravity="center_vertical|end"
         android:contentDescription="@null"
         app:srcCompat="@drawable/ic_expand" />
 

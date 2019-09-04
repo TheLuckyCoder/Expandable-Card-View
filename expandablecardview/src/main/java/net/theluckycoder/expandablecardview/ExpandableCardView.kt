@@ -3,15 +3,15 @@ package net.theluckycoder.expandablecardview
 import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
 import android.content.Context
-import android.support.annotation.IdRes
-import android.support.annotation.StringRes
-import android.support.v4.view.ViewCompat
-import android.support.v7.widget.CardView
 import android.util.AttributeSet
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.IdRes
+import androidx.annotation.StringRes
+import androidx.cardview.widget.CardView
+import androidx.core.view.ViewCompat
 
 /**
  * A CardView that can be expanded
@@ -28,11 +28,15 @@ open class ExpandableCardView : CardView {
         init(null)
     }
 
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
         init(attrs)
     }
 
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    ) {
         init(attrs)
     }
 
@@ -42,10 +46,13 @@ open class ExpandableCardView : CardView {
         var expanded = false
         attrs?.let {
             val typedArray = context.obtainStyledAttributes(attrs, R.styleable.ExpandableCardView)
-            cardTitle = typedArray.getString(R.styleable.ExpandableCardView_title) ?: ""
-            cardDescription = typedArray.getString(R.styleable.ExpandableCardView_description) ?: ""
-            expanded = typedArray.getBoolean(R.styleable.ExpandableCardView_expanded, false)
-            expandDuration = typedArray.getInt(R.styleable.ExpandableCardView_expand_duration, 400).toLong()
+            cardTitle = typedArray.getString(R.styleable.ExpandableCardView_title).orEmpty()
+            cardDescription =
+                typedArray.getString(R.styleable.ExpandableCardView_description).orEmpty()
+            expanded =
+                typedArray.getBoolean(R.styleable.ExpandableCardView_expanded, false)
+            expandDuration =
+                typedArray.getInt(R.styleable.ExpandableCardView_expand_duration, 400).toLong()
 
             typedArray.recycle()
         }
@@ -102,20 +109,33 @@ open class ExpandableCardView : CardView {
     }
 
     private fun measureContentView() {
-        val widthMS = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.AT_MOST)
-        val heightMS = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        val widthMS = MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST)
+        val heightMS = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
         layoutContent.measure(widthMS, heightMS)
     }
 
     private fun animate(from: Int, to: Int) {
-        val valuesHolder: PropertyValuesHolder = PropertyValuesHolder.ofInt("prop", from, to)
+        val alphaValues = if (from > to) {
+            floatArrayOf(1f, 0f)
+        } else {
+            floatArrayOf(0f, 1f)
+        }
 
-        val animator = ValueAnimator.ofPropertyValuesHolder(valuesHolder)
+        val heightValuesHolder = PropertyValuesHolder.ofInt("height", from, to)
+        val alphaValuesHolder = PropertyValuesHolder.ofFloat("alpha", *alphaValues)
+
+        val animator = ValueAnimator.ofPropertyValuesHolder(heightValuesHolder, alphaValuesHolder)
         animator.duration = expandDuration
         animator.addUpdateListener {
-            val value = animator.getAnimatedValue("prop") as Int? ?: 0
-            layoutContent.layoutParams.height = value
-            layoutContent.requestLayout()
+            val newHeight = animator.getAnimatedValue("height") as Int? ?: 0
+            val newAlpha = animator.getAnimatedValue("alpha") as Float? ?: 0f
+
+            with(layoutContent) {
+                layoutParams.height = newHeight
+                alpha = newAlpha
+                requestLayout()
+            }
+
             invalidate()
         }
         animator.start()
@@ -191,11 +211,8 @@ open class ExpandableCardView : CardView {
      */
     open var expandDuration: Long = 400
         set(duration) {
-            if (duration > 0) {
-                field = duration
-            } else {
-                throw IllegalArgumentException("Card Expand Duration can not be smaller than or equal to 0")
-            }
+            require(duration > 0) { "Card Expand Duration must be bigger than 0" }
+            field = duration
         }
 
     /**
@@ -203,7 +220,7 @@ open class ExpandableCardView : CardView {
      * @param text Text to display for the action
      * @param listener Callback to be invoked when the action is clicked
      */
-    open fun setAction(text: CharSequence, listener: View.OnClickListener) {
+    open fun setAction(text: CharSequence, listener: OnClickListener) {
         btnAction.text = text
         btnAction.visibility = View.VISIBLE
         btnAction.setOnClickListener(listener)
@@ -214,7 +231,7 @@ open class ExpandableCardView : CardView {
      * @param resId String resource to display for the action
      * @param listener Callback to be invoked when the action is clicked
      */
-    open fun setAction(@StringRes resId: Int, listener: View.OnClickListener) {
+    open fun setAction(@StringRes resId: Int, listener: OnClickListener) {
         setAction(context.getString(resId), listener)
     }
 }
